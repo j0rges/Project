@@ -27,14 +27,15 @@ introduced the LSTM recurrent neural network to language models. This is what I
 will be working on.
 
 I will be using [pyTorch] to implement and train my models, and use as reference
-the code publicly distributed by Gulordava et al. ([link]: https://github.com/facebookresearch/colorlessgreenRNNs). To work with the word2vec vectors, I will
-be using [gensim].
+the code publicly distributed by Gulordava et al. ([link](https://github.com/facebookresearch/colorlessgreenRNNs)). To work with the word2vec vectors, I will
+be using the [gensim] library for python.
 
 Also relevant to this project are the following papers:
 
   * [Using the Output Embedding to Improve Language Models]
 
   * [The emergence of number and syntax units in LSTM language models]
+
 
 
 
