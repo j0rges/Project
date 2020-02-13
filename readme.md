@@ -31,6 +31,7 @@ the code publicly distributed by Gulordava et al. ([link]: https://github.com/fa
 be using [gensim].
 
 Also relevant to this project are the following papers:
+
   * [Using the Output Embedding to Improve Language Models]
 
   * [The emergence of number and syntax units in LSTM language models]
