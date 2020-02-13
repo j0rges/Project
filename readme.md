@@ -40,7 +40,7 @@ Also relevant to this project are the following papers:
 
 [Word2Vec]: https://code.google.com/archive/p/word2vec/
 
-[Efficient Estimation of Word Representations in Vector Space] : http://arxiv.org/pdf/1301.3781.pdf
+[Efficient Estimation of Word Representations in Vector Space]: http://arxiv.org/pdf/1301.3781.pdf
 
 [Class-based n-gram models of natural language]: https://dl.acm.org/doi/pdf/10.5555/176313.176316?download=false
 
