@@ -1,5 +1,6 @@
 from gensim import KeyedVectors
-import numpy as np
+from numpy import ndarray, zeros
+from torch import Tensor, tensor
 
 
 class Embedding(KeyedVectors):
@@ -28,7 +29,7 @@ class Embedding(KeyedVectors):
             else:
                 raise ValueError('the word "{}" is not in the initial vocabulary!'.format(word))
         self.index2entity = []
-        self.vectors = np.zeros((0,self.vector_size))
+        self.vectors = zeros((0,self.vector_size))
         self.vocab = {}
         self.add(new_vocab,representations)
 
@@ -38,12 +39,30 @@ class Embedding(KeyedVectors):
 
             Input (word): either a string or an integer or a one-hot vector.
 
-            Output: vector representation of the word.
+            Output: vector representation of the word as a numpy array.
 
             Errors: ValueError if the word isn't in the vocabulary or the index
                     is out of range.
         """
-        raise NotImplementedError()
+        valid_types = [int,str,ndarray,list,Tensor]
+        word_type = type(word)
+        
+        if word_type == int:
+            index = word
+        elif word_type == str:
+            if word in self.vocab:
+                index = self.vocab[word].index
+            else:
+                raise ValueError("The word '{}' is not in the vocabulary".format(word))
+        # Finally check if it is a list or numpy/torch equivalent, ie a one-hot
+        # vector.
+        elif word_type in valid_types:
+            raise NotImplementedError("Please provide the input as a string or "
+                  " integer, one-hot vectors are not supported yet.")
+        else:
+            raise ValueError("The input had type '{}', which is not amongst the"
+                  " supported types: {}".format(word_type,valid_types))
+        return self.vectors[index]
 
     def decoder(self, vector):
         """ Turn the output into a distribution over the vocabulary. Perhaps use
