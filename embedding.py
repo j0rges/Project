@@ -1,5 +1,5 @@
 from gensim import KeyedVectors
-from numpy import ndarray, zeros
+from numpy import ndarray, zeros, hstack
 from torch import Tensor, tensor
 
 
@@ -12,27 +12,63 @@ class Embedding(KeyedVectors):
         You can download pretrained embeddings from word2vec code archive.
     """
 
-    def filter_vocab(self, new_vocab):
+    def filter_vocab(self, new_vocab, add_tokens=True, unknown='mean'):
         """ Reduce the vocabulary of the embedding to a subset of it. You may
             want to do this for efficiency (much faster do do operations such as
             most_similar if the vocabulary is smaller).
 
-            Input: new_vocab is a list with all the words wanted in the
-                   vocabulary.
+            Parameters:
+
+                new_vocab: is a list with all the words wanted in the
+                    vocabulary.
+
+                add_tokens: If True, tokens that aren't in the original
+                    vocabulary, will be added and the dimensionality of the
+                    embedding increased. Default: True.
+
+                unknown: what to use as the main vector for tokens that are
+                    added to the vocabulary. 'mean' is the only supported
+                    option, and it is the mean of all other vectors.
+
+            Returns: the new vector size (whether it has changed or not).
         """
         # new_vocab is a list with the words we want in our vocabulary
         representations = []
+        new_tokens = []
+        unknown_vector = self.vectors.mean(axis=0)
         for word in new_vocab:
             if word in self.vocab:
                 vec = self.vectors[self.vocab[word].index]
                 representations.append(vec)
+            elif add_tokens:
+                new_tokens.append(word)
+                representations.append(unknown_vector)
             else:
-                raise ValueError('the word "{}" is not in the initial vocabulary!'.format(word))
-        self.index2entity = []
+                raise ValueError('The word "{}" is not in the initial voca'
+                    'bulary and add_tokens=False.'.format(word))
         self.vectors = zeros((0,self.vector_size))
+        self.index2entity = []
         self.vocab = {}
         self.add(new_vocab,representations)
+        # Add the extra dimensions to all the vectors:
+        if add_tokens and new_tokens:
+            self.add_extra_dimensions(new_tokens)
+            print("The words added to the vocabulary are: {}".format(new_tokens))
+        return self.vector_size
 
+    def add_extra_dimensions(self, new_tokens):
+        """ When words are added to the vocabulary, increase the dimensionality
+            of the embeddings to have an indicator column for each of the new
+            words.
+        """
+        extra_dims = zeros(len(self.vocab), len(new_tokens))
+        # Each new word has it's own indicator dimension. Similar to a one-hot
+        # vector appended to the original vector representations.
+        for i in range(len(new_tokens)):
+            ind = self.vocab[new_tokens[i]].index
+            extra_dims[ind, i] = 1
+        self.vectors = hstack((self.vectors,extra_dims))
+        self.vector_size = self.vector_size + len(new_tokens)
 
     def encoder(self, word):
         """ Return the embedding for a given word.
@@ -46,7 +82,7 @@ class Embedding(KeyedVectors):
         """
         valid_types = [int,str,ndarray,list,Tensor]
         word_type = type(word)
-        
+
         if word_type == int:
             index = word
         elif word_type == str:
