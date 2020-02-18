@@ -1,5 +1,5 @@
 from gensim import KeyedVectors
-from numpy import ndarray, zeros, hstack
+from numpy import ndarray, zeros, hstack, dot
 from torch import Tensor, tensor
 
 
@@ -100,14 +100,23 @@ class Embedding(KeyedVectors):
                   " supported types: {}".format(word_type,valid_types))
         return self.vectors[index]
 
-    def decoder(self, vector):
+    def decoder(self, vector, tau):
         """ Turn the output into a distribution over the vocabulary. Perhaps use
-            the transpose of the encoding (inspired by Press & Wolf 2016).
+            the transpose of the encoding (inspired by Inan et al 2016):
 
-            Input (word): vector representation (output).
+            softmax((V^T x_t)/tau)
+
+            Parameters:
+
+                vector (x_t): the vector on which to base the probability
+                distribution. It must have the same dimensionality as the
+                embeddings.
+
+                tau: temperature parameter.
 
             Output: distribution of probability over the vocabulary.
 
             Errors: ?Error if the dimensions don't match.
         """
-        raise NotImplementedError()
+        logits = tensor(dot(self.vectors,vector)/tau)
+        return logits.softmax(0)
