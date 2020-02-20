@@ -1,6 +1,6 @@
 from gensim import KeyedVectors
-from numpy import ndarray, zeros, hstack, dot
-from torch import Tensor, tensor
+from numpy import ndarray, zeros, hstack, matmul
+from torch import Tensor, tensor, double
 
 
 class Embedding(KeyedVectors):
@@ -70,17 +70,18 @@ class Embedding(KeyedVectors):
         self.vectors = hstack((self.vectors,extra_dims))
         self.vector_size = self.vector_size + len(new_tokens)
 
-    def encoder(self, word):
+    def encode_word(self, word):
         """ Return the embedding for a given word.
 
-            Input (word): either a string or an integer or a one-hot vector.
+            Input (word): either a string(the word) or an integer(the index for
+            the word).
 
             Output: vector representation of the word as a numpy array.
 
             Errors: ValueError if the word isn't in the vocabulary or the index
                     is out of range.
         """
-        valid_types = [int,str,ndarray,list,Tensor]
+        valid_types = [int,str]
         word_type = type(word)
 
         if word_type == int:
@@ -90,33 +91,41 @@ class Embedding(KeyedVectors):
                 index = self.vocab[word].index
             else:
                 raise ValueError("The word '{}' is not in the vocabulary".format(word))
-        # Finally check if it is a list or numpy/torch equivalent, ie a one-hot
-        # vector.
-        elif word_type in valid_types:
-            raise NotImplementedError("Please provide the input as a string or "
-                  " integer, one-hot vectors are not supported yet.")
         else:
             raise ValueError("The input had type '{}', which is not amongst the"
                   " supported types: {}".format(word_type,valid_types))
         return self.vectors[index]
 
-    def decoder(self, vector, tau):
-        """ Turn the output into a distribution over the vocabulary. Perhaps use
-            the transpose of the encoding (inspired by Inan et al 2016):
+    def encoder(self, inputs):
+        """ Encode a batch of words.
 
-            softmax((V^T x_t)/tau)
+            inputs (size (N,)) must be an itearable of words (either it's index
+            or the string itself).
+
+            returns a tensor with shape (N, vector_size), with the encoding of
+            the words.
+        """
+        return tensor([self.encode_word(w) for w in inputs])
+
+    def decoder(self, logits, tau):
+        """ Turn a batch of outputs into a distribution over the vocabulary.
+            Use the transpose of the encoding (inspired by Inan et al 2016):
+
+            softmax((V^T x)/tau)
+
+            where x is each row in logits.
 
             Parameters:
 
-                vector (x_t): the vector on which to base the probability
-                distribution. It must have the same dimensionality as the
-                embeddings.
+                logits: logits from a batch. Array like, with shape
+                (batch_size, vector_size).
 
                 tau: temperature parameter.
 
-            Output: distribution of probability over the vocabulary.
+            Output: distribution of probability over the vocabulary for each
+            element in the batch. torch tensor of type double.
 
-            Errors: ?Error if the dimensions don't match.
         """
-        logits = tensor(dot(self.vectors,vector)/tau)
-        return logits.softmax(0)
+        logits = tensor(matmul(logits,self.vectors.transpose())/tau,
+                        dtype=double)
+        return logits.softmax(1)
