@@ -18,8 +18,8 @@ class RNNModel(nn.Module):
                 layer and the output. Default: True
     """
 
-    def __init__(self, rnn_type, encoding_size, hidden_size, num_layers,
-                 embedding, dropout=0.5, decoupled=True):
+    def __init__(self, encoding_size, hidden_size, num_layers,
+                 embedding, rnn_type='LSTM', dropout=0.5, decoupled=True):
         super(RNNModel, self).__init__()
         # self.drop = nn.Dropout(dropout)
         # self.encoder = nn.Embedding(ntoken, encoding_size)
@@ -39,7 +39,7 @@ class RNNModel(nn.Module):
 
         self.init_weights()
         self.rnn_type = rnn_type
-        self.embedding_size = embedding_size
+        self.encoding_size = encoding_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
 
@@ -50,8 +50,7 @@ class RNNModel(nn.Module):
         return
 
     def forward(self, input, hidden):
-        # emb = self.drop(self.encoder(input))
-        # substitute with word2vec
+        # emb = self.drop(self.encoder(input)) -> Decide on dropout
         emb = self.encoder[input]
         output, hidden = self.rnn(emb, hidden)
         # output = self.drop(output)
