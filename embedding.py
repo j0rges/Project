@@ -1,6 +1,7 @@
+import torch
 from gensim import KeyedVectors
 from numpy import ndarray, zeros, hstack, matmul
-from torch import Tensor, tensor, double
+
 
 
 class Embedding(KeyedVectors):
@@ -73,8 +74,7 @@ class Embedding(KeyedVectors):
     def encode_word(self, word):
         """ Return the embedding for a given word.
 
-            Input (word): either a string(the word) or an integer(the index for
-            the word).
+            Input (word): word as a string or index for the word.
 
             Output: vector representation of the word as a numpy array.
 
@@ -87,10 +87,7 @@ class Embedding(KeyedVectors):
         if word_type == int:
             index = word
         elif word_type == str:
-            if word in self.vocab:
-                index = self.vocab[word].index
-            else:
-                raise ValueError("The word '{}' is not in the vocabulary".format(word))
+            index = self.vocab[word].index
         else:
             raise ValueError("The input had type '{}', which is not amongst the"
                   " supported types: {}".format(word_type,valid_types))
@@ -99,13 +96,12 @@ class Embedding(KeyedVectors):
     def encoder(self, inputs):
         """ Encode a batch of words.
 
-            inputs (size (N,)) must be an itearable of words (either it's index
-            or the string itself).
+            inputs (size (N,)) must be an itearable of indices of words.
 
             returns a tensor with shape (N, vector_size), with the encoding of
             the words.
         """
-        return tensor([self.encode_word(w) for w in inputs])
+        return torch.tensor([self.vectors[idx] for idx in inputs])
 
     def decoder(self, logits, tau):
         """ Turn a batch of outputs into a distribution over the vocabulary.
@@ -126,6 +122,6 @@ class Embedding(KeyedVectors):
             element in the batch. torch tensor of type double.
 
         """
-        logits = tensor(matmul(logits,self.vectors.transpose())/tau,
-                        dtype=double)
+        logits = torch.tensor(matmul(logits,self.vectors.transpose())/tau,
+                        dtype=torch.double)
         return logits.softmax(1)

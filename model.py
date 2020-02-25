@@ -23,7 +23,7 @@ class RNNModel(nn.Module):
         super(RNNModel, self).__init__()
         # self.drop = nn.Dropout(dropout)
         # self.encoder = nn.Embedding(ntoken, encoding_size)
-        self.encoder = embedding
+        self.encoder = embedding.encoder
         if rnn_type in ['LSTM', 'GRU']:
             self.rnn = getattr(nn, rnn_type)(encoding_size, hidden_size, num_layers, dropout=dropout)
         else:
@@ -50,15 +50,9 @@ class RNNModel(nn.Module):
         return
 
     def forward(self, input, hidden):
-        if type(input) != str :
-            raise ValueError("The input must be a string.")
         # emb = self.drop(self.encoder(input))
         # substitute with word2vec
-        try:
-            emb = self.encoder[input]
-        except KeyError:
-            raise ValueError("The input {} is not in the vocabulary.".format(input))
-
+        emb = self.encoder[input]
         output, hidden = self.rnn(emb, hidden)
         # output = self.drop(output)
         decoded = self.decoder(output)
