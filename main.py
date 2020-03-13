@@ -1,7 +1,8 @@
 from data_loader import Corpus
 from encoding import Encoder
+from train_functions import train, evaluate
 from gensim.models import KeyedVectors
-import argparse
+import argparse, math
 
 parser = argparse.ArgumentParser(
     description="In the future, train a LSTM language model using word embeddings.",
@@ -36,7 +37,6 @@ parser.add_argument("--load", default='', type=str,
 
 
 
-
 if __name__ == "__main__":
     args = parser.parse_args()
 
@@ -59,3 +59,9 @@ if __name__ == "__main__":
 
     model = RNNModel(encoder.encoding_size, args.hidden_size,
                     len(corpora.vocab), args.layers, encoder)
+
+    for epoch in range(args.epochs):
+        train(model, corpus, epoch, batch_size=args.batch_size,
+              seq_len=args.seq_len, learning_rate=args.lr)
+        valid_loss = evaluate(model,corpus)
+        print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss, math.exp(valid_loss)))
