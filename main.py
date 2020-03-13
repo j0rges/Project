@@ -1,7 +1,6 @@
 from data_loader import Corpus
 from encoding import Encoder
 from train_functions import train, evaluate
-from gensim.models import KeyedVectors
 import argparse, math
 
 parser = argparse.ArgumentParser(
@@ -47,6 +46,7 @@ if __name__ == "__main__":
                          vectors=stored_dict['vectors'])
     else:
         # Load the pre-trained embeddings
+        from gensim.models import KeyedVectors
         embeddings = KeyedVectors.load_word2vec_format(args.vectors_path,
                                                         binary=True)
         # Load the corpora, find the vocabulary and what is in the embeddings.
