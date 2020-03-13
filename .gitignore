@@ -1,1 +1,1 @@
-wikitext-2/test.txt wikitext-2/train.txt wikitext-2/valid.txt wikitext-2/vocab_freqs_train.pkl wikitext-2/wikitext-2-embeddings.pkl
+wikitext-2/**
