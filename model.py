@@ -18,40 +18,41 @@ class RNNModel(nn.Module):
                 layer and the output. Default: True
     """
 
-    def __init__(self, encoding_size, hidden_size, num_layers,
-                 embedding, rnn_type='LSTM', dropout=0.5, decoupled=True):
+    def __init__(self, encoding_size, hidden_size, output_size, num_layers,
+                 encoder, rnn_type='LSTM', dropout=0, decoupled=True):
         super(RNNModel, self).__init__()
         # self.drop = nn.Dropout(dropout)
         # self.encoder = nn.Embedding(ntoken, encoding_size)
-        self.encoder = embedding.encoder
+        self.encoder = encoder
         if rnn_type in ['LSTM', 'GRU']:
             self.rnn = getattr(nn, rnn_type)(encoding_size, hidden_size, num_layers, dropout=dropout)
         else:
             raise ValueError( "An invalid option for rnn_type was supplied, "
                               "options are ['LSTM', 'GRU']")
-        if decoupled:
-            self.decoder = nn.Linear(hidden_size, encoding_size)
-        else:
-            self.decoder = lambda x : x
-            if hidden_size != encoding_size:
-                raise ValueError("When flagging decoupled as False, the "
-                "encoding_size and the hidden_size must be the same.")
-
-        self.init_weights()
+        # if decoupled:
+        #     self.decoder = nn.Linear(hidden_size, encoding_size)
+        # else:
+        #     self.decoder = lambda x : x
+        #     if hidden_size != encoding_size:
+        #         raise ValueError("When flagging decoupled as False, the "
+        #         "encoding_size and the hidden_size must be the same.")
+        self.decoder = nn.Linear(hidden_size, output_size)
+        self.init_layer(self.decoder)
         self.rnn_type = rnn_type
         self.encoding_size = encoding_size
         self.hidden_size = hidden_size
         self.num_layers = num_layers
 
-    def init_weights(self):
-        initrange = 0.1
-        self.decoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
-        return
+    def init_layer(self, layer):
+      if hasattr(layer, "bias"):
+        if type(layer.bias) != type(None):
+            torch.nn.init.zeros_(layer.bias)
+        if hasattr(layer, "weight"):
+            torch.nn.init.kaiming_normal_(layer.weight)
 
     def forward(self, input, hidden):
         # emb = self.drop(self.encoder(input)) -> Decide on dropout
-        emb = self.encoder[input]
+        emb = self.encoder(input)
         output, hidden = self.rnn(emb, hidden)
         # output = self.drop(output)
         decoded = self.decoder(output)
