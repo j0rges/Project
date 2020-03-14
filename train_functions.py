@@ -10,13 +10,12 @@ def repackage_hidden(h):
     else:
         return tuple(repackage_hidden(v) for v in h)
 
-def train(model, corpus, epoch, batch_size = 25, seq_len = 35, learning_rate = 20, log_interval=200, clip_grad= 0.25):
+def train(model, corpus, criterion, epoch, batch_size = 25, seq_len = 35, learning_rate = 20, log_interval=200, clip_grad= 0.25):
     # Turn on training mode which enables dropout.
     model.train()
     total_loss = 0.
     start_time = time.time()
     number_tokens = len(corpus.vocab)
-    criterion = torch.nn.CrossEntropyLoss()
     train_data = batchify(corpus.train,batch_size)
     hidden = model.init_hidden(batch_size)
 
@@ -48,7 +47,7 @@ def train(model, corpus, epoch, batch_size = 25, seq_len = 35, learning_rate = 2
             start_time = time.time()
 
 
-def evaluate(model, corpus, batch_size = 25, seq_len = 35):
+def evaluate(model, corpus, criterion, batch_size = 25, seq_len = 35):
     # Turn on evaluation mode which disables dropout.
     model.eval()
     total_loss = 0.

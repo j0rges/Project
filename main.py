@@ -1,7 +1,8 @@
 from data_loader import Corpus
 from encoding import Encoder
 from train_functions import train, evaluate
-import argparse, math
+from model import RNNmodel
+import argparse, math, pickle, torch
 
 parser = argparse.ArgumentParser(
     description="In the future, train a LSTM language model using word embeddings.",
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.load:
-        with open(load,'rb') as f:
+        with open(args.load,'rb') as f:
             stored_dict = pickle.load(f)
         corpora = Corpus(args.corpus,load=True,vocab=stored_dict['vocabulary'],
                          vectors=stored_dict['vectors'])
@@ -55,13 +56,15 @@ if __name__ == "__main__":
         # vectors.
         del embeddings
 
+    criterion = torch.nn.CrossEntropyLoss()
+
     encoder = Encoder(50, len(corpora.vocab), corpora.vectors)
 
     model = RNNModel(encoder.encoding_size, args.hidden_size,
                     len(corpora.vocab), args.layers, encoder)
 
     for epoch in range(args.epochs):
-        train(model, corpus, epoch, batch_size=args.batch_size,
+        train(model, corpora, criterion, epoch, batch_size=args.batch_size,
               seq_len=args.seq_len, learning_rate=args.lr)
-        valid_loss = evaluate(model,corpus)
+        valid_loss = evaluate(model,corpora, criterion)
         print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss, math.exp(valid_loss)))
