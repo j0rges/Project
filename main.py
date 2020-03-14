@@ -1,7 +1,7 @@
 from data_loader import Corpus
 from encoding import Encoder
 from train_functions import train, evaluate
-from model import RNNmodel
+from model import RNNModel
 import argparse, math, pickle, torch
 
 parser = argparse.ArgumentParser(
@@ -34,7 +34,19 @@ parser.add_argument("--hidden-size", default=350, type=int,
                     help='The number of units each RNN layer has.')
 parser.add_argument("--load", default='', type=str,
                     help='If provided, the path with vocabulary and vectors.')
+parser.add_argument("--checkpoint", default='', type=str,
+                    help='Path to store checkpoints of the model during training.')
+parser.add_argument("--log-interval", default=100, type=int,
+                    help='Number of batches between information is logged.')
 
+
+def save_checkpoint(model, path, valid_loss, more={}):
+    if path:
+        to_save = {'params' : model.state_dict(),
+                   'valid_loss': valid_loss}.update(more)
+        with open(path, 'wb') as f:
+            pickle.dump(to_save,f)
+        print('checkpoint saved to {}'.format(path))
 
 
 if __name__ == "__main__":
@@ -63,8 +75,19 @@ if __name__ == "__main__":
     model = RNNModel(encoder.encoding_size, args.hidden_size,
                     len(corpora.vocab), args.layers, encoder)
 
+    best_valid_loss = float("inf")
+    lr = args.lr
     for epoch in range(args.epochs):
         train(model, corpora, criterion, epoch, batch_size=args.batch_size,
-              seq_len=args.seq_len, learning_rate=args.lr)
+              seq_len=args.seq_len, learning_rate=lr,
+              log_interval=args.log_interval)
         valid_loss = evaluate(model,corpora, criterion)
-        print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss, math.exp(valid_loss)))
+        print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss,
+              math.exp(valid_loss)))
+        save_checkpoint(model, args.checkpoint, valid_loss)
+
+        # Anneal the learning rate if the validation loss hasn't improved.
+        if valid_loss < best_valid_loss:
+            best_valid_loss = valid_loss
+        else:
+            lr /= 4.0

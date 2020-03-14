@@ -10,7 +10,8 @@ def repackage_hidden(h):
     else:
         return tuple(repackage_hidden(v) for v in h)
 
-def train(model, corpus, criterion, epoch, batch_size = 25, seq_len = 35, learning_rate = 20, log_interval=200, clip_grad= 0.25):
+def train(model, corpus, criterion, epoch, batch_size = 25, seq_len = 35,
+          learning_rate = 20, log_interval=100, clip_grad= 0.25):
     # Turn on training mode which enables dropout.
     model.train()
     total_loss = 0.
