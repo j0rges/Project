@@ -46,9 +46,9 @@ class RNNModel(nn.Module):
     def init_layer(self, layer):
       if hasattr(layer, "bias"):
         if type(layer.bias) != type(None):
-            torch.nn.init.zeros_(layer.bias)
+            nn.init.zeros_(layer.bias)
         if hasattr(layer, "weight"):
-            torch.nn.init.kaiming_normal_(layer.weight)
+            nn.init.kaiming_normal_(layer.weight)
 
     def forward(self, input, hidden):
         # emb = self.drop(self.encoder(input)) -> Decide on dropout
