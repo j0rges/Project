@@ -74,15 +74,14 @@ class Corpus(object):
         return ids
 
 
-def batchify(data, bsz):
+def batchify(data, bsz, device):
     # Work out how cleanly we can divide the dataset into bsz parts.
     nbatch = data.size(0) // bsz
     # Trim off any extra elements that wouldn't cleanly fit (remainders).
     data = data.narrow(0, 0, nbatch * bsz)
     # Evenly divide the data across the bsz batches.
     data = data.view(bsz, -1).t().contiguous()
-    #return data.to(device)
-    return data
+    return data.to(device)
 
 def get_batch(source, i, seq_len=50):
     seq_len = min(seq_len, len(source) - 1 - i)

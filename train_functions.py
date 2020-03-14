@@ -10,14 +10,15 @@ def repackage_hidden(h):
     else:
         return tuple(repackage_hidden(v) for v in h)
 
-def train(model, corpus, criterion, epoch, batch_size = 25, seq_len = 35,
+def train(model, corpus, criterion, epoch, device, batch_size = 25, seq_len = 35,
           learning_rate = 20, log_interval=100, clip_grad= 0.25):
+    model = model.to(device)
     # Turn on training mode which enables dropout.
     model.train()
     total_loss = 0.
     start_time = time.time()
     number_tokens = len(corpus.vocab)
-    train_data = batchify(corpus.train,batch_size)
+    train_data = batchify(corpus.train, batch_size, device)
     hidden = model.init_hidden(batch_size)
 
     for batch, i in enumerate(range(0, train_data.size(0) - 1, seq_len)):
@@ -26,7 +27,7 @@ def train(model, corpus, criterion, epoch, batch_size = 25, seq_len = 35,
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
         model.zero_grad()
         hidden = repackage_hidden(hidden)
-        output, hidden = model(data, hidden)
+        output, hidden = model(data, hidden, device)
         loss = criterion(output.view(-1, number_tokens), targets.long())
         loss.backward()
 

@@ -47,9 +47,9 @@ class Encoder(torch.nn.Module):
         else:
             return torch.stack([self.encode2(val) for val in inputs])
 
-    def forward(self, batch):
-         x1 = self.encode1(batch)
-         x2 = self.encode2(batch)
+    def forward(self, batch, device):
+         x1 = self.encode1(batch).to(device)
+         x2 = self.encode2(batch).to(device)
          x2 = self.linear(x2)
          return torch.cat((x1,x2),-1)
 

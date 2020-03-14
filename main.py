@@ -51,6 +51,11 @@ def save_checkpoint(model, path, valid_loss, more={}):
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    # if available use a GPU.
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
 
     if args.load:
         with open(args.load,'rb') as f:
@@ -78,7 +83,7 @@ if __name__ == "__main__":
     best_valid_loss = float("inf")
     lr = args.lr
     for epoch in range(args.epochs):
-        train(model, corpora, criterion, epoch, batch_size=args.batch_size,
+        train(model, corpora, criterion, epoch, device, batch_size=args.batch_size,
               seq_len=args.seq_len, learning_rate=lr,
               log_interval=args.log_interval)
         valid_loss = evaluate(model,corpora, criterion)
