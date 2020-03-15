@@ -40,12 +40,12 @@ parser.add_argument("--log-interval", default=100, type=int,
                     help='Number of batches between information is logged.')
 
 
-def save_checkpoint(model, path, valid_loss, more={}):
+def save_checkpoint(model, path, valid_loss, args={}):
     if path:
-        to_save = {'params' : model.state_dict(),
-                   'valid_loss': valid_loss}.update(more)
+        to_save = {'params' : model.state_dict(), 'valid_loss': valid_loss,
+                   'args': args}
         with open(path, 'wb') as f:
-            pickle.dump(to_save,f)
+            pickle.dump(to_save, f)
         print('checkpoint saved to {}'.format(path))
 
 
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         valid_loss = evaluate(model,corpora, criterion)
         print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss,
               math.exp(valid_loss)))
-        save_checkpoint(model, args.checkpoint, valid_loss)
+        save_checkpoint(model, args.checkpoint, valid_loss, args)
 
         # Anneal the learning rate if the validation loss hasn't improved.
         if valid_loss < best_valid_loss:
