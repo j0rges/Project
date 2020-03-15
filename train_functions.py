@@ -59,7 +59,7 @@ def evaluate(model, corpus, criterion, device, batch_size = 25, seq_len = 35):
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, seq_len):
             data, targets = get_batch(data_source, i, seq_len=seq_len)
-            output, hidden = model(data, hidden)
+            output, hidden = model(data, hidden, device)
             hidden = repackage_hidden(hidden)
             output_flat = output.view(-1, ntokens)
             total_loss += len(data) * criterion(output_flat, targets.long()).item()
