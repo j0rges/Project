@@ -86,7 +86,7 @@ if __name__ == "__main__":
         train(model, corpora, criterion, epoch, device, batch_size=args.batch_size,
               seq_len=args.seq_len, learning_rate=lr,
               log_interval=args.log_interval)
-        valid_loss = evaluate(model,corpora, criterion)
+        valid_loss = evaluate(model,corpora, criterion, device)
         print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss,
               math.exp(valid_loss)))
         save_checkpoint(model, args.checkpoint, valid_loss, args)

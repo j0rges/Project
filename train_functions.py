@@ -49,12 +49,12 @@ def train(model, corpus, criterion, epoch, device, batch_size = 25, seq_len = 35
             start_time = time.time()
 
 
-def evaluate(model, corpus, criterion, batch_size = 25, seq_len = 35):
+def evaluate(model, corpus, criterion, device, batch_size = 25, seq_len = 35):
     # Turn on evaluation mode which disables dropout.
     model.eval()
     total_loss = 0.
     ntokens = len(corpus.vocab)
-    data_source = batchify(corpus.valid,batch_size)
+    data_source = batchify(corpus.valid, batch_size, device)
     hidden = model.init_hidden(batch_size)
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, seq_len):
