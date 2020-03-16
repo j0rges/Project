@@ -2,6 +2,7 @@ from data_loader import Corpus
 from encoding import Encoder
 from train_functions import train, evaluate
 from model import RNNModel
+from datetime import datetime
 import argparse, math, pickle, torch
 
 parser = argparse.ArgumentParser(
@@ -28,6 +29,8 @@ parser.add_argument("--batch-size", default=64, type=int,
 parser.add_argument("--seq-len", default=35, type=int,
                     help='length of the training sequences (backpropagation '
                     'will be truncated to this number of steps).')
+parser.add_argument("--dropout", default=0.5, type=float,
+                     help='dropout of the network.')
 parser.add_argument("--layers", default=1, type=int,
                     help='Number of stacked RNN layers.')
 parser.add_argument("--hidden-size", default=350, type=int,
@@ -78,11 +81,12 @@ if __name__ == "__main__":
     encoder = Encoder(50, len(corpora.vocab), corpora.vectors)
 
     model = RNNModel(encoder.encoding_size, args.hidden_size,
-                    len(corpora.vocab), args.layers, encoder)
+                    len(corpora.vocab), args.layers, encoder, dropout=args.dropout)
 
     best_valid_loss = float("inf")
     lr = args.lr
     for epoch in range(args.epochs):
+        print('Time at the start of epoch {} is {}'.format(epoch,datetime.now()))
         train(model, corpora, criterion, epoch, device, batch_size=args.batch_size,
               seq_len=args.seq_len, learning_rate=lr,
               log_interval=args.log_interval)

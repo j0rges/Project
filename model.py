@@ -21,7 +21,7 @@ class RNNModel(nn.Module):
     def __init__(self, encoding_size, hidden_size, output_size, num_layers,
                  encoder, rnn_type='LSTM', dropout=0, decoupled=True):
         super(RNNModel, self).__init__()
-        # self.drop = nn.Dropout(dropout)
+        self.drop = nn.Dropout(dropout)
         # self.encoder = nn.Embedding(ntoken, encoding_size)
         self.encoder = encoder
         if rnn_type in ['LSTM', 'GRU']:
@@ -53,6 +53,7 @@ class RNNModel(nn.Module):
     def forward(self, input, hidden, device):
         # emb = self.drop(self.encoder(input)) -> Decide on dropout
         emb = self.encoder(input, device)
+        emb = self.drop(emb)
         output, hidden = self.rnn(emb, hidden)
         # output = self.drop(output)
         decoded = self.decoder(output)
