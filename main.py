@@ -1,6 +1,6 @@
 from data_loader import Corpus
 from encoding import Encoder
-from train_functions import train, evaluate
+from train_functions import Trainer, evaluate
 from model import RNNModel
 from utils import save_checkpoint, Logger
 from datetime import datetime
@@ -50,6 +50,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.log_dir:
         logger = Logger(args.log_dir)
+    else:
+        logger = None
     # if available use a GPU.
     if torch.cuda.is_available():
         device = torch.device('cuda')
@@ -80,12 +82,11 @@ if __name__ == "__main__":
                     len(corpora.vocab), args.layers, encoder, dropout=args.dropout)
 
     best_valid_loss = float("inf")
-    lr = args.lr
+    trainer = Trainer(model, corpora, criterion, device, logger,
+              args.batch_size, args.seq_len, args.lr, args.log_interval)
     for epoch in range(args.epochs):
         print('Time at the start of epoch {} is {}'.format(epoch,datetime.now()))
-        train(model, corpora, criterion, epoch, device, batch_size=args.batch_size,
-              seq_len=args.seq_len, learning_rate=lr,
-              log_interval=args.log_interval)
+        trainer.train()
         valid_loss = evaluate(model,corpora, criterion, device)
         print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss,
               math.exp(valid_loss)))
@@ -97,4 +98,4 @@ if __name__ == "__main__":
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
         else:
-            lr /= 4.0
+            trainer.learning_rate /= 4.0

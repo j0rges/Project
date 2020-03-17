@@ -10,43 +10,64 @@ def repackage_hidden(h):
     else:
         return tuple(repackage_hidden(v) for v in h)
 
-def train(model, corpus, criterion, epoch, device, batch_size = 25, seq_len = 35,
-          learning_rate = 20, log_interval=100, clip_grad= 0.25):
-    model = model.to(device)
-    # Turn on training mode which enables dropout.
-    model.train()
-    total_loss = 0.
-    start_time = time.time()
-    number_tokens = len(corpus.vocab)
-    train_data = batchify(corpus.train, batch_size, device)
-    hidden = model.init_hidden(batch_size)
+class Trainer():
 
-    for batch, i in enumerate(range(0, train_data.size(0) - 1, seq_len)):
-        data, targets = get_batch(train_data, i, seq_len=seq_len)
-        # Starting each batch, we detach the hidden state from how it was previously produced.
-        # If we didn't, the model would try backpropagating all the way to start of the dataset.
-        model.zero_grad()
-        hidden = repackage_hidden(hidden)
-        output, hidden = model(data, hidden, device)
-        loss = criterion(output.view(-1, number_tokens), targets.long())
-        loss.backward()
+    def __init__(self, model, corpus, criterion, device, logger = None,
+                 batch_size = 25, seq_len = 35, learning_rate = 20,
+                 log_interval=100, clip_grad= 0.25):
+        self.device = device
+        self.model = model.to(device)
+        self.train_data = batchify(corpus.train, batch_size, device)
+        self.corpus = corpus
+        self.epoch = -1
+        self.seq_len = seq_len
+        self.learning_rate = learning_rate
+        self.log_interval = log_interval
+        self.clip_grad = clip_grad
+        if logger = None:
+            self.logging = False
+            self.logger = None
+        else:
+            self.logging = True
+            self.logger = logger
 
-        # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
-        torch.nn.utils.clip_grad_norm_(model.parameters(), clip_grad)
-        for p in model.parameters():
-            p.data.add_(-learning_rate, p.grad.data) # Is this just Stochastic Gradient Descent?
+    def train(self):
+        self.epoch += 1
+        self.model.train()
+        total_loss = 0.
+        start_time = time.time()
+        number_tokens = len(self.corpus.vocab)
+        hidden = model.init_hidden(self.batch_size)
 
-        total_loss += loss.item()
+        for batch, i in enumerate(range(0, self.train_data.size(0) - 1, self.seq_len)):
+            data, targets = get_batch(self.train_data, i, seq_len=self.seq_len)
+            # Starting each batch, we detach the hidden state from how it was previously produced.
+            # If we didn't, the model would try backpropagating all the way to start of the dataset.
+            self.model.zero_grad()
+            hidden = repackage_hidden(hidden)
+            output, hidden = self.model(data, hidden, self.device)
+            loss = self.criterion(output.view(-1, number_tokens), targets.long())
+            loss.backward()
 
-        if batch % log_interval == 0 and batch > 0:
-            cur_loss = total_loss / log_interval
-            elapsed = time.time() - start_time
-            print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
-                    'loss {:5.2f} | ppl {:8.2f}'.format(
-                epoch, batch, len(train_data) // seq_len, learning_rate,
-                elapsed * 1000 / log_interval, cur_loss, math.exp(cur_loss)))
-            total_loss = 0
-            start_time = time.time()
+            # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip_grad)
+            for p in self.model.parameters():
+                p.data.add_(-self.learning_rate, p.grad.data) # Is this just Stochastic Gradient Descent?
+
+            total_loss += loss.item()
+
+            if batch % self.log_interval == 0 and batch > 0:
+                cur_loss = total_loss / log_interval
+                elapsed = time.time() - start_time
+                print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
+                        'loss {:5.2f} | ppl {:8.2f}'.format(
+                    self.epoch, batch, len(self.train_data) // self.seq_len,
+                    self.learning_rate, elapsed * 1000 / log_interval,
+                    cur_loss, math.exp(cur_loss)))
+                if self.logging:
+                    self.logger.log_train(self.epoch, batch, curr_loss)
+                total_loss = 0
+                start_time = time.time()
 
 
 def evaluate(model, corpus, criterion, device, batch_size = 25, seq_len = 35):
