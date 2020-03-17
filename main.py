@@ -2,6 +2,7 @@ from data_loader import Corpus
 from encoding import Encoder
 from train_functions import train, evaluate
 from model import RNNModel
+from utils import save_checkpoint
 from datetime import datetime
 import argparse, math, pickle, torch
 
@@ -41,15 +42,6 @@ parser.add_argument("--checkpoint", default='', type=str,
                     help='Path to store checkpoints of the model during training.')
 parser.add_argument("--log-interval", default=100, type=int,
                     help='Number of batches between information is logged.')
-
-
-def save_checkpoint(model, path, valid_loss, args={}):
-    if path:
-        to_save = {'params' : model.state_dict(), 'valid_loss': valid_loss,
-                   'args': args}
-        with open(path, 'wb') as f:
-            pickle.dump(to_save, f)
-        print('checkpoint saved to {}'.format(path))
 
 
 if __name__ == "__main__":

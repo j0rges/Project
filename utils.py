@@ -1,15 +1,14 @@
-import torch
+import pickle
 
+def save_checkpoint(model, path, valid_loss, args={}):
+    if path:
+        to_save = {'params' : model.state_dict(), 'valid_loss': valid_loss,
+                   'args': args}
+        with open(path, 'wb') as f:
+            pickle.dump(to_save, f)
+        print('checkpoint saved to {}'.format(path))
 
-def save_checkpoint(model, path, other={}, verbose=True):
-    """ Save a checkpoint of the parameters in the file pointed to by path,
-        and whatever extra stuff passed through other (must be a dictionary).
-    """
-    torch.save({'parameters': model.model.state_dict()}.update(other),
-                path)
-    if verbose:
-        print('Parameters saved to {}'.format(path))
-
-def load_checkpoint(model, path, kw='parameters', device=torch.device("cpu")):
-    checkpoint = torch.load(path, map_location = device)
-    model.load_state_dict(checkpoint[kw])
+def load_checkpoint(path):
+    with open(path, 'rb') as f:
+        checkpoint = pickle.load(f)
+    return checkpoint
