@@ -17,14 +17,16 @@ class Trainer():
                  log_interval=100, clip_grad= 0.25):
         self.device = device
         self.model = model.to(device)
+        self.criterion = criterion
         self.train_data = batchify(corpus.train, batch_size, device)
         self.corpus = corpus
         self.epoch = -1
+        self.batch_size = batch_size
         self.seq_len = seq_len
         self.learning_rate = learning_rate
         self.log_interval = log_interval
         self.clip_grad = clip_grad
-        if logger = None:
+        if logger == None:
             self.logging = False
             self.logger = None
         else:
@@ -37,7 +39,7 @@ class Trainer():
         total_loss = 0.
         start_time = time.time()
         number_tokens = len(self.corpus.vocab)
-        hidden = model.init_hidden(self.batch_size)
+        hidden = self.model.init_hidden(self.batch_size)
 
         for batch, i in enumerate(range(0, self.train_data.size(0) - 1, self.seq_len)):
             data, targets = get_batch(self.train_data, i, seq_len=self.seq_len)
@@ -57,15 +59,15 @@ class Trainer():
             total_loss += loss.item()
 
             if batch % self.log_interval == 0 and batch > 0:
-                cur_loss = total_loss / log_interval
+                cur_loss = total_loss / self.log_interval
                 elapsed = time.time() - start_time
                 print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
                         'loss {:5.2f} | ppl {:8.2f}'.format(
                     self.epoch, batch, len(self.train_data) // self.seq_len,
-                    self.learning_rate, elapsed * 1000 / log_interval,
+                    self.learning_rate, elapsed * 1000 / self.log_interval,
                     cur_loss, math.exp(cur_loss)))
                 if self.logging:
-                    self.logger.log_train(self.epoch, batch, curr_loss)
+                    self.logger.log_train(self.epoch, batch, cur_loss)
                 total_loss = 0
                 start_time = time.time()
 
