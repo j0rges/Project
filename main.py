@@ -2,7 +2,7 @@ from data_loader import Corpus
 from encoding import Encoder
 from train_functions import train, evaluate
 from model import RNNModel
-from utils import save_checkpoint
+from utils import save_checkpoint, Logger
 from datetime import datetime
 import argparse, math, pickle, torch
 
@@ -40,12 +40,16 @@ parser.add_argument("--load", default='', type=str,
                     help='If provided, the path with vocabulary and vectors.')
 parser.add_argument("--checkpoint", default='', type=str,
                     help='Path to store checkpoints of the model during training.')
+parser.add_argument("--log-dir", default='', type=str,
+                    help='If provided, logs will be stored in the directory.')
 parser.add_argument("--log-interval", default=100, type=int,
                     help='Number of batches between information is logged.')
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    if args.log_dir:
+        logger = Logger(args.log_dir)
     # if available use a GPU.
     if torch.cuda.is_available():
         device = torch.device('cuda')
@@ -85,6 +89,8 @@ if __name__ == "__main__":
         valid_loss = evaluate(model,corpora, criterion, device)
         print('Validation loss: {:.2f}. Perplexity: {:.2f}'.format(valid_loss,
               math.exp(valid_loss)))
+        if args.log_dir:
+            logger.log_valid(epoch, valid_loss)
         save_checkpoint(model, args.checkpoint, valid_loss, args)
 
         # Anneal the learning rate if the validation loss hasn't improved.
