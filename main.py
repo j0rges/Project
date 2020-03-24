@@ -50,6 +50,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.log_dir:
         logger = Logger(args.log_dir)
+        logger.log_description(args)
     else:
         logger = None
     # if available use a GPU.

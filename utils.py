@@ -1,4 +1,5 @@
 import pickle, os, time, math
+from datatime import datetime
 
 def save_checkpoint(model, path, valid_loss, args={}):
     if path:
@@ -21,6 +22,7 @@ class Logger(object):
     def create_files(self, path):
         if not os.path.exists(path):
             raise RuntimeError("the folder {} doesn't exist.")
+        self.base_path = path
         self.train_log_file = os.path.join(path, 'train.csv')
         self.valid_log_file = os.path.join(path,'valid.csv')
         with open(self.train_log_file, 'w') as f:
@@ -40,3 +42,11 @@ class Logger(object):
                                          loss, math.exp(loss))
         with open(self.train_log_file, 'a') as f:
             f.write(line)
+
+    def log_description(self, args):
+        path = os.path.join(self.base_path, 'description.txt')
+        args = args.__dict__
+        with open(path, 'w') as fout:
+            fout.write(str(datetime.now()) + '\n\n')
+            for key, val in args.items():
+                fout.write('{}: {}\n'.format(key,val))
