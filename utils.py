@@ -1,5 +1,5 @@
 import pickle, os, time, math
-from datatime import datetime
+from datetime import datetime
 
 def save_checkpoint(model, path, valid_loss, args={}):
     if path:
