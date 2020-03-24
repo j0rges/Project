@@ -93,7 +93,9 @@ if __name__ == "__main__":
               math.exp(valid_loss)))
         if args.log_dir:
             logger.log_valid(epoch, valid_loss)
-        save_checkpoint(model, args.checkpoint, valid_loss, args)
+        save_checkpoint(model.to(torch.device('cpu')), args.checkpoint,
+                        valid_loss, args)
+        model = model.to(device)
 
         # Anneal the learning rate if the validation loss hasn't improved.
         if valid_loss < best_valid_loss:
