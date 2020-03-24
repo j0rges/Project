@@ -19,10 +19,8 @@ class Logger(object):
         self.create_files(path)
 
     def create_files(self, path):
-        if os.path.exists(path):
-            raise RuntimeError("the folder {} already exists. Are you sure you"
-            " not overwritting some logs?")
-        os.mkdir(path)
+        if not os.path.exists(path):
+            raise RuntimeError("the folder {} doesn't exist.")
         self.train_log_file = os.path.join(path, 'train.csv')
         self.valid_log_file = os.path.join(path,'valid.csv')
         with open(self.train_log_file, 'w') as f:
