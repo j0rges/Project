@@ -32,6 +32,8 @@ parser.add_argument("--seq-len", default=35, type=int,
                     'will be truncated to this number of steps).')
 parser.add_argument("--dropout", default=0.5, type=float,
                      help='dropout of the network.')
+parser.add_argument("--clip-grad", default=0.25, type=float,
+                     help='gradient clipping.')
 parser.add_argument("--layers", default=1, type=int,
                     help='Number of stacked RNN layers.')
 parser.add_argument("--hidden-size", default=350, type=int,
@@ -84,7 +86,8 @@ if __name__ == "__main__":
 
     best_valid_loss = float("inf")
     trainer = Trainer(model, corpora, criterion, device, logger,
-              args.batch_size, args.seq_len, args.lr, args.log_interval)
+              args.batch_size, args.seq_len, args.lr, args.log_interval,
+              args.clip_grad)
     for epoch in range(args.epochs):
         print('Time at the start of epoch {} is {}'.format(epoch,datetime.now()))
         trainer.train()
@@ -98,7 +101,7 @@ if __name__ == "__main__":
         model = model.to(device)
 
         # Anneal the learning rate if the validation loss hasn't improved.
-        if valid_loss < best_valid_loss:
+        if (valid_loss - best_valid_loss) < 0.01:
             best_valid_loss = valid_loss
         else:
             trainer.learning_rate /= 4.0
