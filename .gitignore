@@ -1,2 +1,4 @@
 wikitext-2/**
 **/__pycache__/**
+train_data
+slurm*
