@@ -50,9 +50,9 @@ class RNNModel(nn.Module):
         if hasattr(layer, "weight"):
             nn.init.kaiming_normal_(layer.weight)
 
-    def forward(self, input, hidden, device):
+    def forward(self, input, hidden):
         # emb = self.drop(self.encoder(input)) -> Decide on dropout
-        emb = self.encoder(input, device)
+        emb = self.encoder(input)
         emb = self.drop(emb)
         output, hidden = self.rnn(emb, hidden)
         # output = self.drop(output)

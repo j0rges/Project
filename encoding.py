@@ -47,9 +47,9 @@ class Encoder(torch.nn.Module):
         else:
             return torch.stack([self.encode2(val) for val in inputs])
 
-    def forward(self, batch, device):
-         x1 = self.encode1(batch).to(device)
-         x2 = self.encode2(batch).to(device)
+    def forward(self, batch):
+         x1 = self.encode1(batch).to(self.device)
+         x2 = self.encode2(batch).to(self.device)
          x2 = self.linear(x2)
          return torch.cat((x1,x2),-1)
 
@@ -59,3 +59,7 @@ class Encoder(torch.nn.Module):
             torch.nn.init.zeros_(layer.bias)
         if hasattr(layer, "weight"):
             torch.nn.init.kaiming_normal_(layer.weight)
+
+    @property
+    def device(self):
+        return next(self.parameters()).device
