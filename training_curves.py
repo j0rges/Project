@@ -9,6 +9,7 @@ parser.add_argument('directory', type=str)
 parser.add_argument('--logs', nargs='+')
 parser.add_argument('--description')
 parser.add_argument('--description-only', action='store_true')
+parser.add_argument('--plot-name', action='store_true')
 
 def plot_curves(df_dict, fname='plot.png', time=True):
     """ if time = True plot wrt time, otherwise, plt wrt epoch """
@@ -68,4 +69,4 @@ if __name__=='__main__':
         descriptions(dirs, file_to=args.description)
     if not args.description_only:
         df_dict = load_dfs(dirs, names)
-        plot_curves(df_dict)
+        plot_curves(df_dict, args.plot_name)

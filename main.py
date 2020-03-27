@@ -8,22 +8,14 @@ import argparse, math, pickle, torch
 
 parser = argparse.ArgumentParser(
     description="In the future, train a LSTM language model using word embeddings.",
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-)
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,)
 parser.add_argument(
-    "--corpus",
-    default="wikitext-2/",
-    type=str,
-    help="Path where train.txt, valid.txt and test.txt are contained."
-)
-parser.add_argument(
-    "--embedding-path",
-    default="vectors.pkl",
-    type=str,
-    help="Path for the binary file containing the embeddings."
-)
+    "--corpus", default="wikitext-2/", type=str,
+    help="Path where train.txt, valid.txt and test.txt are contained.")
+parser.add_argument("--embedding-path", default="vectors.pkl", type=str,
+                    help="Path for the binary file containing the embeddings.")
 parser.add_argument("--epochs", default=20, type=int,
-                help='Number of epochs to train for.')
+                    help='Number of epochs to train for.')
 parser.add_argument("--lr", default=20, type=int, help='learning rate.')
 parser.add_argument("--batch-size", default=64, type=int,
                     help='Number of batches to divide the data in.')
@@ -101,7 +93,7 @@ if __name__ == "__main__":
         model = model.to(device)
 
         # Anneal the learning rate if the validation loss hasn't improved.
-        if (valid_loss - best_valid_loss) < 0.01:
+        if (valid_loss - best_valid_loss) < -0.01:
             best_valid_loss = valid_loss
         else:
             trainer.learning_rate /= 4.0
