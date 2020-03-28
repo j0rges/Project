@@ -2,6 +2,7 @@ from data_loader import Corpus
 from encoding import Encoder
 from train_functions import Trainer, evaluate
 from model import RNNModel
+from old_model import RNNModel as old_model
 from utils import save_checkpoint, Logger
 from datetime import datetime
 import argparse, math, pickle, torch
@@ -38,6 +39,8 @@ parser.add_argument("--log-dir", default='', type=str,
                     help='If provided, logs will be stored in the directory.')
 parser.add_argument("--log-interval", default=100, type=int,
                     help='Number of batches between information is logged.')
+parser.add_argument("--old-model", action='store_true')
+parser.add_argument("--encoder-size", type=int, default=400)
 
 
 if __name__ == "__main__":
@@ -69,17 +72,19 @@ if __name__ == "__main__":
         # vectors.
         del embeddings
 
-    criterion = torch.nn.CrossEntropyLoss()
-
-    encoder = Encoder(50, len(corpora.vocab), corpora.vectors)
-
-    model = RNNModel(encoder.encoding_size, args.hidden_size,
+    if args.old_model:
+        model = old_model('LSTM', len(corpora.vocab), args.encoder_size,
+                    args.hidden_size, args.layers, args.dropout)
+    else:
+        encoder = Encoder(50, len(corpora.vocab), corpora.vectors)
+        model = RNNModel(encoder.encoding_size, args.hidden_size,
                     len(corpora.vocab), args.layers, encoder, dropout=args.dropout)
 
-    best_valid_loss = float("inf")
+    criterion = torch.nn.CrossEntropyLoss()
     trainer = Trainer(model, corpora, criterion, device, logger,
               args.batch_size, args.seq_len, args.lr, args.log_interval,
               args.clip_grad)
+    best_valid_loss = float("inf")
     for epoch in range(args.epochs):
         print('Time at the start of epoch {} is {}'.format(epoch,datetime.now()))
         trainer.train()
