@@ -53,8 +53,10 @@ if __name__ == "__main__":
     # if available use a GPU.
     if torch.cuda.is_available():
         device = torch.device('cuda')
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
     else:
         device = torch.device('cpu')
+        torch.set_default_tensor_type('torch.FloatTensor')
 
     if args.load:
         with open(args.load,'rb') as f:
