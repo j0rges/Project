@@ -1,4 +1,5 @@
 import torch
+F = torch.nn.functional
 
 class Encoder(torch.nn.Module):
     """ Word encoder. If the word already has a representation, returns that
@@ -19,33 +20,31 @@ class Encoder(torch.nn.Module):
             have a pre-trained vector representation.
         """
         super().__init__()
-        self.vectors = torch.tensor(vectors)
-        self.default = torch.zeros(self.vectors.shape[1])
+        vectors = torch.tensor(vectors)
         self.input_size = vocab_size - len(vectors)
-        self.hidden_size = size
         assert self.input_size > 0
-
-        self.encoding_size = self.hidden_size + self.vectors.shape[1]
+        self.hidden_size = size
+        self.encoding_size = self.hidden_size + vectors.shape[1]
         self.linear = torch.nn.Linear(self.input_size, self.hidden_size)
         self.init_layer(self.linear)
 
+        defaults = torch.zeros((self.input_size, vectors.shape[1]))
+        self.vectors = torch.cat((vectors, defaults), 0)
+
+        defaults = torch.zeros((vocab_size - self.input_size, self.input_size))
+        one_hot = torch.zeros((self.input_size, self.input_size))
+        # add the ones
+        one_hot = one_hot.scatter(1,
+                  torch.tensor([[i] for i in range(self.input_size)]), 1)
+        self.linear_inputs = torch.cat((defaults, one_hot), 0)
+
+
+
     def encode1(self, inputs):
-        if len(inputs.shape) == 0:
-            if inputs >= len(self.vectors):
-                return self.default
-            else:
-                return self.vectors[inputs]
-        else:
-            return torch.stack([self.encode1(val) for val in inputs])
+        return F.embedding(inputs, self.vectors)
 
     def encode2(self, inputs):
-        if len(inputs.shape) == 0:
-            x = torch.zeros(self.input_size)
-            if inputs >= len(self.vectors):
-                x[inputs - len(self.vectors)] = 1
-            return x
-        else:
-            return torch.stack([self.encode2(val) for val in inputs])
+        return F.embedding(inputs, self.linear_inputs)
 
     def forward(self, batch):
          x1 = self.encode1(batch)
