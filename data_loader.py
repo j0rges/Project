@@ -15,12 +15,13 @@ class Corpus(object):
             embedding should be provided.
     """
 
-    def __init__(self, path, embedding=None, vocab=None, vectors=None, load=False):
+    def __init__(self, path, embedding=None, vocab=None, vectors=None,
+                load=False, portion=1):
         if load:
             self._load(vocab,vectors)
         else:
             self.narrow_vocab(os.path.join(path, 'train.txt'), embedding)
-        self.train = self.tokenize(os.path.join(path, 'train.txt'))
+        self.train = self.tokenize(os.path.join(path, 'train.txt'), portion)
         self.valid = self.tokenize(os.path.join(path, 'valid.txt'))
         self.test = self.tokenize(os.path.join(path, 'test.txt'))
 
@@ -57,7 +58,7 @@ class Corpus(object):
         self.vocab = emb_vocab
         self.vectors = vectors
 
-    def tokenize(self, path):
+    def tokenize(self, path, portion=1):
         """ Returns the word indices for a text file (dataset) """
         assert os.path.exists(path)
 
@@ -65,11 +66,13 @@ class Corpus(object):
 
         with open(path, 'r', encoding="utf8") as f:
             idss = []
+            num_lines = 0
             for line in f:
                 words = line.split() + ['<eos>']
                 ids = [word2idx(word) for word in words]
                 idss.append(torch.tensor(ids).type(torch.int64))
-            ids = torch.cat(idss)
+                num_lines += 1
+            ids = torch.cat(idss[:int(num_lines * portion)])
 
         return ids
 

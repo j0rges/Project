@@ -41,6 +41,9 @@ parser.add_argument("--log-interval", default=100, type=int,
                     help='Number of batches between information is logged.')
 parser.add_argument("--old-model", action='store_true')
 parser.add_argument("--encoder-size", type=int, default=400)
+parser.add_argument("--dataset-portion", type=float, default=1,
+                    help="If provided, this is the proportion of the training "
+                    "set to be used in training.")
 
 
 if __name__ == "__main__":
@@ -62,7 +65,7 @@ if __name__ == "__main__":
         with open(args.load,'rb') as f:
             stored_dict = pickle.load(f)
         corpora = Corpus(args.corpus,load=True,vocab=stored_dict['vocabulary'],
-                         vectors=stored_dict['vectors'])
+                   vectors=stored_dict['vectors'], portion=args.dataset_portion)
     else:
         # Load the pre-trained embeddings
         from gensim.models import KeyedVectors
