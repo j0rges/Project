@@ -61,9 +61,7 @@ def result_(row, logits, word2idx):
     else:
         return 0
 
-
-if __name__ == "__main__":
-    arguments = parser.parse_args()
+def main(arguments):
     # Get the data we need from the checkpoint
     try:
         checkpoint = load_checkpoint(arguments.checkpoint)
@@ -105,7 +103,12 @@ if __name__ == "__main__":
     model.eval()
     sentences = batchify(sentences, 1)
     hidden = model.init_hidden(1)
-    input, _ = get_batch(sentences, 0, 10)
+    input, _ = get_batch(sentences, 0, len(sentences))
     output, hidden = model(input, hidden)
-    results = gold.apply(lambda x: result(x, output, word2idx))
+    results = gold.apply(lambda x: result_(x, output, word2idx), axis=1)
+    return results
+
+if __name__ == "__main__":
+    arguments = parser.parse_args()
+    results = main(arguments)
     print(sum(results), len(results), sum(results)/len(results))

@@ -2,12 +2,14 @@ import os, argparse, pickle, sys
 import pandas as pd
 import matplotlib.pyplot as plt
 
-description_keys = {'batch_size','dropout','hidden_size','clip_grad'}
+description_keys = {'dropout','hidden_size','clip_grad',
+                    'dataset_portion', 'old_model'}
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=str)
-parser.add_argument('--logs', nargs='+')
-parser.add_argument('--description')
+parser.add_argument('--logs', type=str, nargs='+')
+parser.add_argument('--description', type=str, help='filename of description'
+                    'file if one is required.')
 parser.add_argument('--description-only', action='store_true')
 parser.add_argument('--plot-name', type=str, default='plot.png')
 
