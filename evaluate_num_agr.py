@@ -106,9 +106,9 @@ def main(arguments):
     input, _ = get_batch(sentences, 0, len(sentences))
     output, hidden = model(input, hidden)
     results = gold.apply(lambda x: result_(x, output, word2idx), axis=1)
-    return results
+    return results, checkpoint['valid_loss']
 
 if __name__ == "__main__":
     arguments = parser.parse_args()
-    results = main(arguments)
+    results, _ = main(arguments)
     print(sum(results), len(results), sum(results)/len(results))

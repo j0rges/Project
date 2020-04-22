@@ -1,3 +1,5 @@
+# Plot training curves of different training instances saved in a directory.
+# Also serves as a small library of useful functions for my plots.
 import os, argparse, pickle, sys
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -66,6 +68,19 @@ def descriptions(dirs, file_to='descriptions.txt', filename='description.txt'):
                         fout.write(line)
             fout.write('\n')
 
+def get_attributes(dirs, names, attributes, filename='description.txt'):
+    dict = {}
+    for dir,name in zip(dirs,names):
+        file_in = os.path.join(dir, filename)
+        dict[name] = {}
+        with open(file_in, 'r') as fin:
+            for line in fin:
+                line = line.split(':')
+                key = line[0]
+                if key in attributes:
+                    dict[name][key] = line[1].strip()
+
+    return dict
 
 if __name__=='__main__':
     args = parser.parse_args()
