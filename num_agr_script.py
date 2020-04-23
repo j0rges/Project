@@ -1,5 +1,5 @@
 # Evaluate and store in a file the number agreement results.
-import os, math, pickle
+import os, math, pickle, argparse
 from training_curves import get_dirs
 from evaluate_num_agr import main as num_agr
 
