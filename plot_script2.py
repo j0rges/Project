@@ -1,6 +1,6 @@
 # Plot the final validation perplexity of old and new models against the
 # portion of the dataset used for training.
-import os
+import os, pickle
 import matplotlib.pyplot as plt
 from training_curves import get_dirs, load_dfs, get_attributes
 
@@ -37,8 +37,8 @@ new = [proportion(d['results']) for d,_ in dicts_new]
 fname = 'dataset_size.png'
 assert len(old)==len(new)
 xs = range(len(old))
-plt.plot(xs,old,'o--r', label='classic model')
-plt.plot(xs,new,'o--b', label='my model')
+plt.plot(xs,old,'o--b', label='normal model')
+plt.plot(xs,new,'o--r', label='enhanced model')
 plt.ylabel('validation perplexity')
 plt.xlabel('% of dataset used in training')
 plt.xticks(xs, range(90, 29, -10))
