@@ -50,10 +50,12 @@ def get_dirs(directory, names=[]):
     if len(names)==0:
         names = os.listdir(directory)
     dirs = []
-    for name in names:
+    for name in names.copy():
         path = os.path.join(directory, name)
         if check_dir(path):
             dirs.append(path)
+        else:
+            names.remove(name)
     return dirs, names
 
 def descriptions(dirs, file_to='descriptions.txt', filename='description.txt'):
