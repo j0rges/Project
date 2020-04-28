@@ -38,21 +38,20 @@ def load_dfs(dirs, names, file='valid.csv'):
         dfs[name] = relative_time(pd.read_csv(filename))
     return dfs
 
-def check_dir(path):
-    test_file = 'valid.csv'
+def check_dir(path, test_file='valid.csv'):
     if os.path.isdir(path):
         # check test file is in the directory
         if test_file in os.listdir(path):
             return True
     return False
 
-def get_dirs(directory, names=[]):
+def get_dirs(directory, names=[], test_file='valid.csv'):
     if len(names)==0:
         names = os.listdir(directory)
     dirs = []
     for name in names.copy():
         path = os.path.join(directory, name)
-        if check_dir(path):
+        if check_dir(path, test_file):
             dirs.append(path)
         else:
             names.remove(name)
