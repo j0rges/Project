@@ -1,9 +1,9 @@
 ## About: ##
 
 This is just a repository for the code I will use in the final year project of
-my Meng Mathematics and Computer Science. It is related to language models,
-using LSTMs and seeing how using already trained word embeddings affect the
-language model.
+my Meng Mathematics and Computer Science. 
+
+In this project I am looking into the effect of using pre-trained word embeddings/representatios instead of a linear encoding layer in LSTM based language models. I will consider how it affects the final performance of the model, in terms of perplexity, as well as the number of epochs needed to achieve this performance. I will also look at whether this change affects the model's ability to track the hierarchical syntactic structure of language through the number agreement task.
 
 ## Reference material: ##
 
@@ -30,7 +30,7 @@ I will be using [pyTorch] to implement and train my models, and use as reference
 the code publicly distributed by Gulordava et al. ([link](https://github.com/facebookresearch/colorlessgreenRNNs)). To work with the word2vec vectors, I will
 be using the [gensim] library for python.
 
-Also relevant to this project are the following papers:
+Also relevant to this project are the following papers related to language model's ability to learn to track syntactic structure:
 
   * [Using the Output Embedding to Improve Language Models]
 
