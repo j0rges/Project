@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 import pickle, os
 from training_curves import get_dirs
 
@@ -52,3 +53,35 @@ def performance_df(gold_df, names):
     performances = [proportion(gold_df[name]) for name in names]
     new_df = pd.DataFrame(data=[performances],columns=names)
     return new_df
+
+def get_stats(df, column='proportion', swaplevels=True):
+    """ return the mean and standard deviation of for columns with column as a
+        level (assumes multiindex columns).
+    """
+    if swaplevels:
+        df = df.swaplevel(axis=1)
+    values = df[column]
+    return values.mean(axis=1).to_numpy(), values.std(axis=1).to_numpy()
+
+def plot_num_attractors(attractors_new, attractors_old,
+                        plot_name='acc_attractors.png'):
+    """ Plot and save plot of variation of performance and corresponding std for
+        input dataframes, as the number of attractors changes. Returns the
+        matplotlib.pyplot.axes with the plot.
+    """
+    # Get the index and check
+    xs = list(attractors_new.index)
+    assert list(attractors_old.index) == xs
+    means_new, std_new = get_stats(attractors_new)
+    means_old, std_old = get_stats(attractors_old)
+    # Make the plot
+    fig, ax = plt.subplots()
+    ax.errorbar(xs, means_new*100, fmt='o-r', yerr=stds_new*100, label='enhanced model')
+    ax.errorbar(xs, means_old*100, fmt='o-b', yerr=stds_old*100, label='baseline model')
+    ax.set_xticks(xs)
+    ax.set_xlabel('number of attractors')
+    ax.set_ylabel('accuracy')
+    ax.grid(axis='y')
+    ax.legend()
+    plt.savefig(plot_name)
+    return ax
