@@ -37,7 +37,7 @@ new = [proportion(d['results']) for d,_ in dicts_new]
 fname = 'dataset_size.png'
 assert len(old)==len(new)
 xs = range(len(old))
-plt.plot(xs,old,'o--b', label='normal model')
+plt.plot(xs,old,'o--b', label='baseline model')
 plt.plot(xs,new,'o--r', label='enhanced model')
 plt.ylabel('validation perplexity')
 plt.xlabel('% of dataset used in training')

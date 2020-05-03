@@ -25,7 +25,7 @@ new = sorted([df['perplexity'].to_numpy()[-1] for key,df in new.items()])
 fname = 'dataset_size.png'
 assert len(old)==len(new)
 xs = range(len(old))
-plt.plot(xs,old,'o--b', label='normal model')
+plt.plot(xs,old,'o--b', label='baseline model')
 plt.plot(xs,new,'o--r', label='enhanced model')
 plt.ylabel('validation perplexity')
 plt.xlabel('% of dataset used in training')

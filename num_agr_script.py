@@ -5,10 +5,11 @@ from evaluate_num_agr import main as num_agr
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=str)
+parser.add_argument('--logs', type=str, nargs='+', default=[])
 
-dir = parser.parse_args().directory
+args = parser.parse_args()
 
-dirs, names = get_dirs(dir)
+dirs, names = get_dirs(args.directory, args.logs)
 
 class FakeArgs():
     def __init__(self, checkpoint, text_file, gold_file):
