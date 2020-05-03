@@ -6,6 +6,7 @@ from evaluate_num_agr import main as num_agr
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=str)
 parser.add_argument('--logs', type=str, nargs='+', default=[])
+parser.add_argument('--results-file', type=str, default='num_agr_result.pkl')
 
 args = parser.parse_args()
 
@@ -22,7 +23,7 @@ arguments = FakeArgs('checkpoint.pkl','num_agr/subj_agr_filtered.text',
                      'num_agr/subj_agr_filtered.gold', False)
 for dir in dirs:
     arguments.checkpoint = os.path.join(dir,'checkpoint.pkl')
-    path = os.path.join(dir,'num_agr_result.pkl')
+    path = os.path.join(dir,args.results_file)
     results, loss = num_agr(arguments)
     to_save = {'results': results, 'perplexity': math.exp(loss)}
     with open(path, 'wb') as f:
