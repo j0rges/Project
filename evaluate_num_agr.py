@@ -16,8 +16,8 @@ parser.add_argument('--gold-file', type=str, default='num_agr/subj_agr_filtered.
         help='path to file containing context size, right target and wrong target.')
 parser.add_argument('--text-file', type=str, default='num_agr/subj_agr_filtered.text',
         help='path to file containing the sentences.')
-# parser.add_argument('nonce', type=store_true,
-#         help='if provided, indicates the dataset is')
+parser.add_argument('--nonce', action='store_true',
+        help='if provided, indicates the dataset is')
 
 class Word2idx():
     def __init__(self, vocab):
@@ -61,6 +61,15 @@ def result_(row, logits, word2idx):
     else:
         return 0
 
+def nonce_gold(path):
+    nonce_df = pd.read_csv(path, delimiter='\t')
+    gold_df = pd.DataFrame()
+    gold_df[['context','right']] = nonce_df.loc[nonce_df['class'] == 'correct',
+                                    ['len_context', 'form']]
+    gold_df[['wrong','attractors']] = nonce_df.loc[nonce_df['class'] == 'wrong',
+                                    ['form', 'n_attr']]
+    return gold_df
+
 def main(arguments):
     # Get the data we need from the checkpoint
     try:
@@ -94,9 +103,12 @@ def main(arguments):
     word2idx = Word2idx(corpora.vocab)
     sentences, lengths = tokenize(arguments.text_file, word2idx)
     lengths = np.cumsum([0] + lengths[:-1])
-    # load the number agreement data, which should be tab sepparated.
-    gold = pd.read_csv(arguments.gold_file, delimiter='\t',
-                names=['context','right','wrong','attractors'])
+    if arguments.nonce:
+        gold = nonce_gold(arguments.gold_file)
+    else:
+        # load the number agreement data, which should be tab sepparated.
+        gold = pd.read_csv(arguments.gold_file, delimiter='\t',
+                    names=['context','right','wrong','attractors'])
     # Get the location of the target verbs.
     gold['idx'] = gold['context'] + lengths
     # Get the predictions.

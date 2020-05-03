@@ -12,13 +12,14 @@ args = parser.parse_args()
 dirs, names = get_dirs(args.directory, args.logs)
 
 class FakeArgs():
-    def __init__(self, checkpoint, text_file, gold_file):
+    def __init__(self, checkpoint, text_file, gold_file, nonce=False):
         self.checkpoint = checkpoint
         self.text_file = text_file
         self.gold_file = gold_file
+        self.nonce = nonce
 
 arguments = FakeArgs('checkpoint.pkl','num_agr/subj_agr_filtered.text',
-                     'num_agr/subj_agr_filtered.gold')
+                     'num_agr/subj_agr_filtered.gold', False)
 for dir in dirs:
     arguments.checkpoint = os.path.join(dir,'checkpoint.pkl')
     path = os.path.join(dir,'num_agr_result.pkl')
