@@ -3,8 +3,14 @@ import matplotlib.pyplot as plt
 import pickle, os
 from training_curves import get_dirs
 
-GOLD_PATH='num_agr/subj_agr_filtered.gold'
-RESULTS_FILE='num_agr_result.pkl'
+def nonce_gold(path):
+    nonce_df = pd.read_csv(path, delimiter='\t')
+    gold_df = pd.DataFrame()
+    gold_df[['context','right','type']] = nonce_df.loc[nonce_df['class'] == 'correct',
+                                    ['len_context', 'form', 'type']].reset_index(drop=True)
+    gold_df[['wrong','attractors']] = nonce_df.loc[nonce_df['class'] == 'wrong',
+                                    ['form', 'n_attr']].reset_index(drop=True)
+    return gold_df
 
 def load_results(dir, filename='num_agr_result.pkl'):
     """ Extract the results of the number agreement task from the directory.
@@ -16,15 +22,19 @@ def load_results(dir, filename='num_agr_result.pkl'):
     return dict_['results']
 
 
-def results_dataframe(dir):
+def results_dataframe(dir, gold_path = 'num_agr/subj_agr_filtered.gold',
+                            file_path = 'num_agr_result.pkl', nonce=False):
     """ Create a dataframe with information of each test sentence for the number
         agreement task, and whether it was predicted right by each saved model
         in dir with stored results.
     """
-    dirs, names = get_dirs(dir, test_file=RESULTS_FILE)
+    dirs, names = get_dirs(dir, test_file=file_path)
     # Load the information about the sentences as a dataframe
-    gold = pd.read_csv(GOLD_PATH, delimiter='\t',
-                names=['context','right','wrong','attractors'])
+    if nonce:
+        gold = nonce_gold(gold_path)
+    else:
+        gold = pd.read_csv(gold_path, delimiter='\t',
+                    names=['context','right','wrong','attractors'])
     # Load the results for each instance trained.
     results = [load_results(dir) for dir in dirs]
     # Add the results to the dataframe
@@ -72,12 +82,14 @@ def plot_num_attractors(attractors_new, attractors_old,
     # Get the index and check
     xs = list(attractors_new.index)
     assert list(attractors_old.index) == xs
-    means_new, std_new = get_stats(attractors_new)
-    means_old, std_old = get_stats(attractors_old)
+    means_new, stds_new = get_stats(attractors_new)
+    means_old, stds_old = get_stats(attractors_old)
     # Make the plot
     fig, ax = plt.subplots()
-    ax.errorbar(xs, means_new*100, fmt='o-r', yerr=stds_new*100, label='enhanced model')
-    ax.errorbar(xs, means_old*100, fmt='o-b', yerr=stds_old*100, label='baseline model')
+    ax.errorbar(xs, means_new*100, fmt='o-r', yerr=stds_new*100,
+                label='enhanced model', capsize = 5)
+    ax.errorbar(xs, means_old*100, fmt='o-b', yerr=stds_old*100,
+                label='baseline model', capsize = 5)
     ax.set_xticks(xs)
     ax.set_xlabel('number of attractors')
     ax.set_ylabel('accuracy')
