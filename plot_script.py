@@ -8,6 +8,8 @@ from training_curves import get_dirs, load_dfs, get_attributes
 attributes = ['old_model','dataset_portion']
 dir = 'train_data/half'
 
+plt.rcParams.update({'font.size': 13})  
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--measure', default='perplexity', choices=['num_agr','perplexity'])
 parser.add_argument('--complete-baseline', type=str)

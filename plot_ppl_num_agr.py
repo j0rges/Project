@@ -4,6 +4,8 @@ import os, pickle
 import matplotlib.pyplot as plt
 from training_curves import get_dirs
 
+plt.rcParams.update({'font.size': 13})  
+
 dir_new = 'train_data'
 dir_old = 'train_data/normal'
 

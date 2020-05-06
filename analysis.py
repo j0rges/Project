@@ -79,6 +79,7 @@ def plot_num_attractors(attractors_new, attractors_old,
         input dataframes, as the number of attractors changes. Returns the
         matplotlib.pyplot.axes with the plot.
     """
+    plt.rcParams.update({'font.size': 13})
     # Get the index and check
     xs = list(attractors_new.index)
     assert list(attractors_old.index) == xs
@@ -97,3 +98,13 @@ def plot_num_attractors(attractors_new, attractors_old,
     ax.legend()
     plt.savefig(plot_name)
     return ax
+
+def make_plot(old_dir, new_dir, gold_path = 'num_agr/subj_agr_filtered.gold',
+             file_path = 'num_agr_result.pkl', nonce=False):
+    new_df, new_names = results_dataframe(new_dir, gold_path, file_path, nonce)
+    old_df, old_names = results_dataframe(old_dir, gold_path, file_path, nonce)
+
+    new_df = num_attractors_df(new_df, new_names)
+    old_df = num_attractors_df(old_df, old_names)
+
+    return plot_num_attractors(new_df, old_df)
