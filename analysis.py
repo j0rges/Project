@@ -36,7 +36,7 @@ def results_dataframe(dir, gold_path = 'num_agr/subj_agr_filtered.gold',
         gold = pd.read_csv(gold_path, delimiter='\t',
                     names=['context','right','wrong','attractors'])
     # Load the results for each instance trained.
-    results = [load_results(dir) for dir in dirs]
+    results = [load_results(dir, file_path) for dir in dirs]
     # Add the results to the dataframe
     for name,result in zip(names,results):
         gold[name] = result

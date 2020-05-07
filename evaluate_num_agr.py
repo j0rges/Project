@@ -2,11 +2,8 @@
 import argparse, os, pickle, torch
 import pandas as pd
 import numpy as np
-from utils import load_checkpoint
-from data_loader import Corpus, get_batch
-from encoding import Encoder
-from model import RNNModel
-from old_model import RNNModel as old_model
+from data_loader import get_batch
+from utils import load_model_corpora, load_checkpoint
 
 parser = argparse.ArgumentParser()
 
@@ -72,33 +69,7 @@ def nonce_gold(path):
 
 def main(arguments):
     # Get the data we need from the checkpoint
-    try:
-        checkpoint = load_checkpoint(arguments.checkpoint)
-        args = checkpoint['args']
-        params = checkpoint['params']
-    except Exception as e:
-        print('The following exception ocurred:')
-        print(e)
-        raise RuntimeError('The first object in checkpoint must be a '
-              'dictionary containing at least [args,params].')
-    # Use the arguments to create a model that is the same as the one we have
-    # the parameters for.
-    if args.load:
-        with open(args.load,'rb') as f:
-            stored_dict = pickle.load(f)
-        corpora = Corpus(args.corpus,load=True,vocab=stored_dict['vocabulary'],
-                   vectors=stored_dict['vectors'])
-    if not hasattr(args, 'old_model'):
-        args.old_model = False
-    if args.old_model:
-        model = old_model('LSTM', len(corpora.vocab), args.encoder_size,
-                    args.hidden_size, args.layers, args.dropout)
-    else:
-        encoder = Encoder(50, len(corpora.vocab), corpora.vectors)
-        model = RNNModel(encoder.encoding_size, args.hidden_size,
-                    len(corpora.vocab), args.layers, encoder, dropout=args.dropout)
-    # load the parameters from checkpoint
-    model.load_state_dict(params)
+    model, corpora = load_model_corpora(arguments.checkpoint)
     # load the sentences
     word2idx = Word2idx(corpora.vocab)
     sentences, lengths = tokenize(arguments.text_file, word2idx)
@@ -118,6 +89,7 @@ def main(arguments):
     input, _ = get_batch(sentences, 0, len(sentences))
     output, hidden = model(input, hidden)
     results = gold.apply(lambda x: result_(x, output, word2idx), axis=1)
+    checkpoint = load_checkpoint(arguments.checkpoint)
     return results, checkpoint['valid_loss']
 
 if __name__ == "__main__":
