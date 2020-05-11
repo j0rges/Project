@@ -21,13 +21,13 @@ parser.add_argument("--lr", default=20, type=int, help='learning rate.')
 parser.add_argument("--batch-size", default=64, type=int,
                     help='Number of batches to divide the data in.')
 parser.add_argument("--seq-len", default=35, type=int,
-                    help='length of the training sequences (backpropagation '
+                    help='length of the training sequences (backpropagation through time'
                     'will be truncated to this number of steps).')
 parser.add_argument("--dropout", default=0.5, type=float,
                      help='dropout of the network.')
 parser.add_argument("--clip-grad", default=0.25, type=float,
                      help='gradient clipping.')
-parser.add_argument("--layers", default=1, type=int,
+parser.add_argument("--layers", default=2, type=int,
                     help='Number of stacked RNN layers.')
 parser.add_argument("--hidden-size", default=350, type=int,
                     help='The number of units each RNN layer has.')
@@ -40,7 +40,7 @@ parser.add_argument("--log-dir", default='', type=str,
 parser.add_argument("--log-interval", default=100, type=int,
                     help='Number of batches between information is logged.')
 parser.add_argument("--old-model", action='store_true')
-parser.add_argument("--encoder-size", type=int, default=400)
+parser.add_argument("--encoder-size", type=int, default=350)
 parser.add_argument("--dataset-portion", type=float, default=1,
                     help="If provided, this is the proportion of the training "
                     "set to be used in training.")

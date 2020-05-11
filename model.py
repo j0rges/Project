@@ -55,7 +55,7 @@ class RNNModel(nn.Module):
         emb = self.encoder(input)
         emb = self.drop(emb)
         output, hidden = self.rnn(emb, hidden)
-        # output = self.drop(output)
+        output = self.drop(output)
         decoded = self.decoder(output)
         # See what we put here (decoder layer or not?)
         return decoded, hidden

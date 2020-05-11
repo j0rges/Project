@@ -7,7 +7,7 @@ def nonce_gold(path):
     nonce_df = pd.read_csv(path, delimiter='\t')
     gold_df = pd.DataFrame()
     gold_df[['context','right','type']] = nonce_df.loc[nonce_df['class'] == 'correct',
-                                    ['len_context', 'form', 'type']].reset_index(drop=True)
+                                    ['len_prefix', 'form', 'type']].reset_index(drop=True)
     gold_df[['wrong','attractors']] = nonce_df.loc[nonce_df['class'] == 'wrong',
                                     ['form', 'n_attr']].reset_index(drop=True)
     return gold_df
